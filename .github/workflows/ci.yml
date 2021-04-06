@@ -1,0 +1,115 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  clock-CI:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Get Next Version
+      uses: PssbleTrngle/VersionManagment@v2
+      id: version
+      with:
+        token: ${{secrets.GITHUB_TOKEN}}
+        fallback: 1.0.0
+        default-fragment: feature
+          
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.x
+        
+    - name: Install dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./test/
+
+    - name: Pack
+      run: dotnet pack -o package -c Release /p:VersionPrefix=${{steps.version.outputs.next}}
+
+    - name: Codecov
+      uses: codecov/codecov-action@v1.0.15
+      with:
+        fail_ci_if_error: true
+
+    - name: Rename artifact
+      run: mv ./package/*.nupkg ./package.nupkg
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2.2.1
+      with:
+        name: 'ci-artifact'
+        path: './package.nupkg'
+        error: Fail the action with an error message
+        if-no-files-found: error
+        
+  nuget-Pack:
+    
+    needs: [clock-CI]
+    
+    if: github.ref == 'refs/heads/main'
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2.0.6
+        with:
+           name: 'ci-artifact'
+           
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.301
+
+      - run: ls
+          
+      - name: Publish package
+        run: dotnet nuget push ./package.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_KEY }}
+
+  create-release:
+    
+    needs: [nuget-Pack]
+    
+    if: github.ref == 'refs/heads/main'
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Get Next Label
+        uses: PssbleTrngle/VersionManagment@v2
+        id: label
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          prefix: v
+          fallback: 1.0.0
+          default-fragment: feature
+
+      - name: Commit tagger
+        uses: tvdias/github-tagger@v0.0.2
+        with:
+          # The GITHUB_TOKEN secret
+          repo-token: ${{secrets.GITHUB_TOKEN}}
+          # Tag text
+          tag: ${{steps.label.outputs.next}}
+
+      - name: Create a Release
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # The name of the tag. This should come from the webhook payload, `github.GITHUB_REF` when a user pushes a new tag
+          tag_name: ${{steps.label.outputs.next}}
+          # The name of the release. For example, `Release v1.0.1`
+          release_name: Release ${{steps.label.outputs.next}}
