@@ -11,6 +11,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClockManager.UnitTests", "t
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClockManager", "src\ClockManager\ClockManager.csproj", "{114C5F51-2810-4EB6-8148-1ACC97E594BF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{DC36619E-4FCB-41E3-AC13-4F866AD28E2E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{B58BD62B-8858-4317-A745-805B8454281D}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2E301960-C085-4B1B-BA1C-1498F02996BE}"
+	ProjectSection(SolutionItems) = preProject
+		codecov.yml = codecov.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +44,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D5CDA87E-7DE3-4487-A849-8929C155576E} = {FED0D5AA-342A-4669-9BD9-1F22F78C7B1D}
 		{114C5F51-2810-4EB6-8148-1ACC97E594BF} = {1D71C1C9-7E28-4089-90C0-FAC6D6FD1AEA}
+		{B58BD62B-8858-4317-A745-805B8454281D} = {DC36619E-4FCB-41E3-AC13-4F866AD28E2E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A83CBA1E-944B-46D0-BED6-6E981A791ED7}
